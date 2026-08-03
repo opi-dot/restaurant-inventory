@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurant Inventory Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-gray-100 p-6">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    const initialItems = [
+      { id: 1, name: 'Ribeye Steak', category: 'Meat', quantity: 14, unit: 'kg', threshold: 10 },
+      { id: 2, name: 'Fresh Tomatoes', category: 'Produce', quantity: 8, unit: 'kg', threshold: 15 },
+      { id: 3, name: 'Whole Milk', category: 'Dairy', quantity: 22, unit: 'L', threshold: 10 },
+      { id: 4, name: 'Olive Oil', category: 'Pantry', quantity: 5, unit: 'L', threshold: 8 },
+      { id: 5, name: 'Burger Buns', category: 'Bakery', quantity: 120, unit: 'units', threshold: 50 },
+    ];
+
+    function App() {
+      const [items, setItems] = useState(initialItems);
+      const [search, setSearch] = useState('');
+      const [filterCategory, setFilterCategory] = useState('All');
+      const [newItem, setNewItem] = useState({ name: '', category: 'Produce', quantity: 0, unit: 'kg', threshold: 5 });
+
+      const updateQty = (id, delta) => {
+        setItems(items.map(i => i.id === id ? { ...i, quantity: Math.max(0, i.quantity + delta) } : i));
+      };
+
+      const addItem = (e) => {
+        e.preventDefault();
+        if (!newItem.name) return;
+        setItems([...items, { ...newItem, id: Date.now(), quantity: Number(newItem.quantity), threshold: Number(newItem.threshold) }]);
+        setNewItem({ name: '', category: 'Produce', quantity: 0, unit: 'kg', threshold: 5 });
+      };
+
+      const filtered = items.filter(i => 
+        i.name.toLowerCase().includes(search.toLowerCase()) && 
+        (filterCategory === 'All' || i.category === filterCategory)
+      );
+
+      const lowStockCount = items.filter(i => i.quantity <= i.threshold).length;
+
+      return (
+        <div class="max-w-4xl mx-auto space-y-6">
+          <div class="bg-white p-6 rounded-xl shadow-sm flex justify-between items-center">
+            <div>
+              <h1 class="text-2xl font-bold text-gray-800">Kitchen Stock Tracker</h1>
+              <p class="text-sm text-gray-500">Real-time inventory management</p>
+            </div>
+            <div class="flex gap-4 text-center">
+              <div class="bg-blue-50 p-3 rounded-lg"><p class="text-2xl font-bold text-blue-600">{items.length}</p><p class="text-xs text-gray-600">Total Items</p></div>
+              <div class="bg-amber-50 p-3 rounded-lg"><p class="text-2xl font-bold text-amber-600">{lowStockCount}</p><p class="text-xs text-gray-600">Low Stock Alerts</p></div>
+            </div>
+          </div>
+
+          <div class="bg-white p-6 rounded-xl shadow-sm space-y-4">
+            <h2 class="font-bold text-gray-700">Add New Stock Item</h2>
+            <form onSubmit={addItem} class="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <input required placeholder="Item Name" value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} class="p-2 border rounded-lg col-span-2 md:col-span-1" />
+              <select value={newItem.category} onChange={e => setNewItem({...newItem, category: e.target.value})} class="p-2 border rounded-lg">
+                <option>Meat</option><option>Produce</option><option>Dairy</option><option>Pantry</option><option>Bakery</option>
+              </select>
+              <input type="number" min="0" value={newItem.quantity} onChange={e => setNewItem({...newItem, quantity: e.target.value})} class="p-2 border rounded-lg" placeholder="Qty" />
+              <input type="number" min="0" value={newItem.threshold} onChange={e => setNewItem({...newItem, threshold: e.target.value})} class="p-2 border rounded-lg" placeholder="Alert Threshold" />
+              <button class="bg-blue-600 text-white font-medium p-2 rounded-lg hover:bg-blue-700 col-span-2 md:col-span-1">Add Item</button>
+            </form>
+          </div>
+
+          <div class="bg-white p-6 rounded-xl shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row gap-3 justify-between">
+              <input placeholder="Search stock..." value={search} onChange={e => setSearch(e.target.value)} class="p-2 border rounded-lg w-full sm:w-64" />
+              <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} class="p-2 border rounded-lg">
+                <option>All</option><option>Meat</option><option>Produce</option><option>Dairy</option><option>Pantry</option><option>Bakery</option>
+              </select>
+            </div>
+
+            <div class="divide-y">
+              {filtered.map(item => {
+                const isLow = item.quantity <= item.threshold;
+                return (
+                  <div key={item.id} class="py-3 flex items-center justify-between">
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class="font-medium text-gray-800">{item.name}</span>
+                        {isLow && <span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold">Low Stock</span>}
+                      </div>
+                      <span class="text-xs text-gray-400">{item.category} • Reorder at {item.threshold} {item.unit}</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <button onClick={() => updateQty(item.id, -1)} class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold text-gray-600">-</button>
+                      <span class="w-16 text-center font-bold text-gray-700">{item.quantity} {item.unit}</span>
+                      <button onClick={() => updateQty(item.id, 1)} class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold text-gray-600">+</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
