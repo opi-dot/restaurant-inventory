@@ -21,8 +21,7 @@
       { id: 3, name: 'Oat Milk', category: 'Dairy', quantity: 22, unit: 'L', threshold: 5 },
       { id: 4, name: 'Labneh', category: 'Souces', quantity: 2, unit: 'L', threshold: 1 },
       { id: 5, name: 'Burger Buns', category: 'Bakery', quantity: 20, unit: 'units', threshold: 5 },
-      { id: 6, name: 'Hummus', category: 'Souces', quantity: 2, unit: 'units', threshold: 1 },
-     
+      { id: 6, name: 'Hummus', category: 'Souces', quantity: 2, unit: 'units', threshold: 1 }
     ];
 
     function App() {
@@ -67,7 +66,7 @@
             <form onSubmit={addItem} class="grid grid-cols-2 md:grid-cols-5 gap-3">
               <input required placeholder="Item Name" value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} class="p-2 border rounded-lg col-span-2 md:col-span-1" />
               <select value={newItem.category} onChange={e => setNewItem({...newItem, category: e.target.value})} class="p-2 border rounded-lg">
-                <option>Meat</option><option>Produce</option><option>Dairy</option><option>Pantry</option><option>Bakery</option><option>Souces<option>
+                <option>Meat</option><option>Produce</option><option>Dairy</option><option>Pantry</option><option>Bakery</option><option>Souces</option>
               </select>
               <input type="number" min="0" value={newItem.quantity} onChange={e => setNewItem({...newItem, quantity: e.target.value})} class="p-2 border rounded-lg" placeholder="Qty" />
               <input type="number" min="0" value={newItem.threshold} onChange={e => setNewItem({...newItem, threshold: e.target.value})} class="p-2 border rounded-lg" placeholder="Alert Threshold" />
